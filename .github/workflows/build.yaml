@@ -91,6 +91,7 @@ jobs:
                         --signing-key melange.rsa \
                         $file
                 done
+                ls -al
 
             # - name: Upload to registry
             #   env:
