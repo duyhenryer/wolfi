@@ -80,3 +80,4 @@ update:
     identifier: dunglas/frankenphp
     strip-prefix: v
     tag-filter: v
+
