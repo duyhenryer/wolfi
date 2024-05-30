@@ -101,7 +101,7 @@ jobs:
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               run: |
                 rclone copy packages Packages:wolfi
-                rclone copy Packages:wolfi-php/${{ matrix.arch }}/APKINDEX.tar.gz .
+                rclone copy Packages:wolfi/${{ matrix.arch }}/APKINDEX.tar.gz .
 
                 melange index \
                   --arch ${{ matrix.arch }} \
