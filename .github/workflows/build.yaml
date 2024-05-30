@@ -1,0 +1,115 @@
+name: Build packages
+
+on:
+    push:
+      branches:
+        - main
+      paths:
+        - '*.yaml'
+
+jobs:
+    build:
+        concurrency:
+          group: build-${{ matrix.os }}
+          cancel-in-progress: false
+        strategy:
+          matrix:
+            include:
+              - os: ubuntu-latest
+                arch: x86_64
+                deb: amd64
+              - os: buildjet-4vcpu-ubuntu-2204-arm
+                arch: aarch64
+                deb: arm64
+        runs-on: ${{ matrix.os }}
+        container:
+            image: ghcr.io/wolfi-dev/sdk:latest
+            options: |
+                --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor:unconfined
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            - name: 'Trust the github workspace'
+              run: |
+                # This is to avoid fatal errors about "dubious ownership" because we are
+                # running inside of a container action with the workspace mounted in.
+                git config --global --add safe.directory "$(pwd)"
+
+            - name: Look for changed files
+              id: changes
+              uses: tj-actions/changed-files@v44
+              with:
+                files_yaml: |
+                  melange:
+                    - ./*.yaml
+            
+            - name: Install rclone
+              run: |
+                cd /tmp
+                curl -o rclone.zip -L https://downloads.rclone.org/rclone-current-linux-${{ matrix.deb }}.zip
+                unzip rclone.zip
+                cp rclone*/rclone /usr/bin/
+                rm -rf rclone*
+            
+            - name: Rclone Setup
+              run: |
+                mkdir -p $HOME/.config/rclone
+                cat <<EOF > $HOME/.config/rclone/rclone.conf
+                [Packages]
+                type = s3
+                provider = Cloudflare
+                env_auth = true
+                region = auto
+                endpoint = https://462253b6d74e978eef45525725050f0e.r2.cloudflarestorage.com
+                EOF
+
+            - name: Create packages directory
+              run: mkdir -p packages
+
+            - name: Get signing key
+              run: |
+                echo "${{ secrets.SIGNING_KEY }}" | base64 -d >  melange.rsa
+
+            - name: Build packages
+              run: |
+                for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
+                    if [[ $file == ".yam.yaml" ]]; then
+                        continue
+                    fi
+
+                    melange build \
+                        --arch ${{ matrix.arch }} \
+                        --generate-index=false \
+                        -r https://packages.wolfi.dev/os \
+                        -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
+                        -r https://wolfi.duyne.me \
+                        -k https://wolfi.duyne.me/melange.rsa.pub \
+                        --signing-key melange.rsa \
+                        $file
+                done
+
+            - name: Upload to registry
+              env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              run: |
+                rclone copy packages Packages:wolfi-php
+                rclone copy Packages:wolfi-php/${{ matrix.arch }}/APKINDEX.tar.gz .
+
+                melange index \
+                  --arch ${{ matrix.arch }} \
+                  -m \
+                  --signing-key php-signing.rsa \
+                  packages/${{ matrix.arch }}/*.apk
+
+                rclone copy APKINDEX.tar.gz Packages:wolfi-php/${{ matrix.arch }}/
+
+            - name: Purge cache
+              uses: jakejarvis/cloudflare-purge-action@master
+              env:
+                CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+                CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+                PURGE_URLS: '["https://wolfi.duyne.me/x86_64/APKINDEX.tar.gz", "https://wolfi.duyne.me/aarch64/APKINDEX.tar.gz"]'
