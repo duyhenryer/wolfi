@@ -101,14 +101,16 @@ jobs:
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               run: |
                 rclone copy packages Packages:wolfi
+                echo "step 1"
                 rclone copy Packages:wolfi/${{ matrix.arch }}/APKINDEX.tar.gz .
-
+                echo "APKINDEX"
+                ls -al
                 melange index \
                   --arch ${{ matrix.arch }} \
                   -m \
                   --signing-key melange.rsa \
                   packages/${{ matrix.arch }}/*.apk
-
+                echo "step latest"
                 rclone copy APKINDEX.tar.gz Packages:wolfi/${{ matrix.arch }}/
 
             # - name: Purge cache
