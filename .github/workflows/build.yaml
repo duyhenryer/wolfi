@@ -92,6 +92,7 @@ jobs:
                         $file
                 done
                 ls -al
+                ls -al packages
 
             # - name: Upload to registry
             #   env:
