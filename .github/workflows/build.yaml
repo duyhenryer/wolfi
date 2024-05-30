@@ -106,7 +106,7 @@ jobs:
                 melange index \
                   --arch ${{ matrix.arch }} \
                   -m \
-                  --signing-key php-signing.rsa \
+                  --signing-key melange.rsa \
                   packages/${{ matrix.arch }}/*.apk
 
                 rclone copy APKINDEX.tar.gz Packages:wolfi-php/${{ matrix.arch }}/
