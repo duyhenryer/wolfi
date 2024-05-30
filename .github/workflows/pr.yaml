@@ -47,6 +47,6 @@ jobs:
                         -r https://packages.wolfi.dev/os \
                         -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
                         -r https://wolfi.duyne.me \
-                        -k https://wolfi.duyne.me/melange.rsa.pub \
+                        -k https://wolfi.duyne.me/signing.rsa.pub \
                         $file
                 done

@@ -73,7 +73,7 @@ jobs:
 
             - name: Get signing key
               run: |
-                echo "${{ secrets.SIGNING_KEY }}" | base64 -d >  melange.rsa
+                echo "${{ secrets.SIGNING_KEY }}" | base64 -d >  signing.rsa
 
             - name: Build packages
               run: |
@@ -88,12 +88,10 @@ jobs:
                         -r https://packages.wolfi.dev/os \
                         -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
                         -r https://wolfi.duyne.me \
-                        -k https://wolfi.duyne.me/melange.rsa.pub \
-                        --signing-key melange.rsa \
+                        -k https://wolfi.duyne.me/signing.rsa.pub \
+                        --signing-key signing.rsa \
                         $file
                 done
-                ls -al
-                ls -al packages
 
             - name: Upload to registry
               env:
@@ -101,16 +99,12 @@ jobs:
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               run: |
                 rclone copy packages Packages:wolfi
-                echo "step 1"
                 rclone copy Packages:wolfi/${{ matrix.arch }}/APKINDEX.tar.gz .
-                echo "APKINDEX"
-                ls -al
                 melange index \
                   --arch ${{ matrix.arch }} \
                   -m \
-                  --signing-key melange.rsa \
+                  --signing-key signing.rsa \
                   packages/${{ matrix.arch }}/*.apk
-                echo "step latest"
                 rclone copy APKINDEX.tar.gz Packages:wolfi/${{ matrix.arch }}/
 
             # - name: Purge cache

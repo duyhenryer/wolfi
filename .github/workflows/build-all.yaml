@@ -51,7 +51,7 @@ jobs:
 
             - name: Get signing key
               run: |
-                echo "${{ secrets.SIGNING_KEY }}" | base64 -d > melange.rsa
+                echo "${{ secrets.SIGNING_KEY }}" | base64 -d > signing.rsa
 
             - name: Build packages
               run: |
@@ -66,8 +66,8 @@ jobs:
                         -r https://packages.wolfi.dev/os \
                         -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
                         -r https://wolfi.duyne.me \
-                        -k https://wolfi.duyne.me/melange.rsa.pub \
-                        --signing-key melange.rsa \
+                        -k https://wolfi.duyne.me/signing.rsa.pub \
+                        --signing-key signing.rsa \
                         $file
                 done
 
