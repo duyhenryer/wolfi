@@ -19,7 +19,8 @@ jobs:
               - os: ubuntu-latest
                 arch: x86_64
                 deb: amd64
-              - os: buildjet-4vcpu-ubuntu-2204-arm
+              # - os: buildjet-4vcpu-ubuntu-2204-arm
+              - os: ubuntu-20.04
                 arch: aarch64
                 deb: arm64
         runs-on: ${{ matrix.os }}
