@@ -3,17 +3,17 @@ FROM cgr.dev/chainguard/wolfi-base:latest
 RUN echo "https://wolfi.duyne.me" >> /etc/apk/repositories && \
 cat <<EOF > /etc/apk/keys/melange.rsa.pub
 -----BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA9s0rytmiqI5l6IgwLqiD
-ecg3jwDIHWfzVmzfedTen4KW5MkmUVXgFXbmegD/e4arNzqkw2tpqIkYgKO4G5MF
-wMvfvx4NP/dDBmEwRkqiq53+TfiaLZQYpotZy1Zrb7GHQBIQ+hK1ekN+WFBOmhd5
-fwdPPBLbG1aOjigyydLdriLCDOf7mo7OZq7K42Ima2/Mp/Cdb12JswxIc5XYuJwX
-35grsQy7dcli7QUbh20f/teB0hMb70V9RanXf2I8lzZ74djHMlDk6lJ0blBA8Wzl
-P0m+yznoGIcSvix18XO78/TlbEajH/m8w4mjrNsgzeRlMeexOz0JO6fn7FtcRh3X
-QmgAQ5QRy3ioZ1haEdr+oLlEOGUlmG1xdnpRCPAb8L0Xu7qDJr8Sm7DKPpzM5Jc4
-k8/WCHJzsmOYPSV83itxTk6hfiMY5L/IsJsOe9/ZzUxmpiLEY5NSjiS+jSu/I492
-PePYfiX/on7GNEzbRRaQzQ9cwKSKswpXxkk8dPQUTDPZ4SGclJzE0Yle/utQ4AJM
-vMYK/ceaMC56CvEfoUmH3o2H0Y8MRhEE0hQ7xmIWlTfgJx256ToXG3auNVWs2Ax2
-cwcAYarHaBAYoljBMyCqMWW+7nLCXoI0bAb0O4f2X2I6zpD2MsE7obLQA6l6x/X+
-og/rYbYh7rDgqPyhAU8tJicCAwEAAQ==
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1kuqmxeTo+oBBp9kolVx
+IFuHULV3G+wglqvGgctGxlN6Q6YNOW0+KyT+Z0UF/+U/9qUDH6l8DXroQS/w0emv
+lIk5Xv03nMTcrJ9Jo6ljqthI3Y9Ku13GnV6nCoCfUW/UZzgWeoUu4C3gRGEqHLHz
+vtIY18iTJg312WjN0t85V0OGkMevzuKFCCY4ngnhysInlB9/N1MfWSyAnc2wC8rj
+XZocAh/IRxsu96fIPhljL2ggFQezJUn3onDC1rrJIOCSUm0vcerB636jRTdukRvX
+NJXe7V4GxbAyOSlekXKmYlCIkqRpEmKkRf4H+jCMFoSrHAPbU1IA7TkLR2q6uMD2
+f6de8qTO8oEINCrRKpjMMMY7uyg3H+57rkSwPBSrz7di1ZlvOSypUwm/fYcyt3lF
+BFsvBH/Th8QlYHQVsYQ/K4Mwtcl1h7SmwzABiOhmGLLQmGUS2rj0Sk/e5KfZ0gt4
+1fg3mvVkTl40mQdMNFBXvqe0w/PXjkAlK6epoDtBpSS/Sx7mmUvKxVU9/572lGK3
+enkRZDywTZuh2kS//8uG0zGNUXWSy2xftG3Kw369aneZ41ZesQhG0xKmyW/2Of1S
+vXDEjEeob9dYZjlbs5RVKrjSPX4mwh4LMj7HsdkBHVZ8d2nuVekq8vbbRgkcSa5e
+tbmdukAIJyoKLCSGREe0VnUCAwEAAQ==
 -----END PUBLIC KEY-----
 EOF
