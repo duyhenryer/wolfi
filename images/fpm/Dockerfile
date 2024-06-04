@@ -1,4 +1,4 @@
-FROM ghcr.io/shyim/wolfi-php/base:latest
+FROM ghcr.io/duyhenryer/wolfi-php/base:latest
 
 ARG PHP_VERSION=8.3
 
