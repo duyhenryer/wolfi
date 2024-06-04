@@ -81,7 +81,7 @@ jobs:
                     if [[ $file == ".yam.yaml" ]]; then
                         continue
                     fi
-
+                    ls -al
                     melange build \
                         --arch ${{ matrix.arch }} \
                         --generate-index=false \
