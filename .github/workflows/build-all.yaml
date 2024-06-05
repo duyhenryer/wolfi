@@ -71,18 +71,18 @@ jobs:
                         $file
                 done
 
-            # - name: Upload to registry
-            #   env:
-            #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            #   run: |
-            #     rclone copy packages Packages:wolfi-php
-            #     rclone copy Packages:wolfi-php/${{ matrix.arch }}/APKINDEX.tar.gz .
+            - name: Upload to registry
+              env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              run: |
+                rclone copy packages Packages:wolfi-php
+                rclone copy Packages:wolfi-php/${{ matrix.arch }}/APKINDEX.tar.gz .
 
-            #     melange index \
-            #       --arch ${{ matrix.arch }} \
-            #       -m \
-            #       --signing-key php-signing.rsa \
-            #       packages/${{ matrix.arch }}/*.apk
+                melange index \
+                  --arch ${{ matrix.arch }} \
+                  -m \
+                  --signing-key php-signing.rsa \
+                  packages/${{ matrix.arch }}/*.apk
 
-            #     rclone copy APKINDEX.tar.gz Packages:wolfi-php/${{ matrix.arch }}/
+                rclone copy APKINDEX.tar.gz Packages:wolfi-php/${{ matrix.arch }}/
