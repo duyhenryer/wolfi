@@ -93,6 +93,8 @@ jobs:
                         $file
                 done
                 ls -al
+                ls -al packages/x86_64/
+                tree .
 
             - name: Upload to registry
               env:
