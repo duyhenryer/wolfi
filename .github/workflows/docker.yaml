@@ -42,7 +42,7 @@ jobs:
                 username: ${{ github.repository_owner }}
                 password: ${{ github.token }}
 
-            - uses: docker/build-push-action@v5
+            - uses: docker/build-push-action@v6
               with:
                 tags: ghcr.io/duyhenryer/wolfi-php/base:latest
                 platforms: linux/amd64,linux/arm64
@@ -80,7 +80,7 @@ jobs:
               username: ${{ github.repository_owner }}
               password: ${{ github.token }}
               
-          - uses: docker/build-push-action@v5
+          - uses: docker/build-push-action@v6
             with:
               tags: ghcr.io/duyhenryer/wolfi-php/frankenphp:${{ matrix.php }}
               platforms: linux/amd64,linux/arm64
@@ -122,7 +122,7 @@ jobs:
               username: ${{ github.repository_owner }}
               password: ${{ github.token }}
 
-          - uses: docker/build-push-action@v5
+          - uses: docker/build-push-action@v6
             with:
               tags: ghcr.io/duyhenryer/wolfi-php/fpm:${{ matrix.php }}
               platforms: linux/amd64,linux/arm64
