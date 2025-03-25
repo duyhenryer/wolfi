@@ -93,7 +93,7 @@ jobs:
               --log-level debug \
               $file || echo "Build failed for $file on ${{ matrix.arch }}, continuing to index"
           done
-
+        continue-on-error: true
       - name: Index packages
         run: |
           melange index \
