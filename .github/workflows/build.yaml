@@ -19,10 +19,6 @@ jobs:
           - os: ubuntu-latest
             arch: x86_64
             deb: amd64
-          # Thêm aarch64 nếu bạn có runner hỗ trợ
-          # - os: nscloud-ubuntu-22.04-arm64-8x8
-          #   arch: aarch64
-          #   deb: arm64
     runs-on: ${{ matrix.os }}
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
@@ -84,8 +80,6 @@ jobs:
             melange build \
               --arch ${{ matrix.arch }} \
               --generate-index=false \
-              -r https://wolfi.duyne.me \
-              -k https://wolfi.duyne.me/wolfi-melange.rsa.pub \
               --signing-key wolfi-melange.rsa \
               --git-repo-url=https://github.com/duyhenryer/wolfi \
               --git-commit=${{ github.sha }} \
@@ -99,7 +93,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           rclone copy packages Packages:wolfi
-          rclone copy Packages:wolfi/${{ matrix.arch }}/APKINDEX.tar.gz .
+          rclone copy Packages:wolfi/${{ matrix.arch }}/APKINDEX.tar.gz . || echo "No previous index found, creating new one"
           melange index \
             --arch ${{ matrix.arch }} \
             -m \
