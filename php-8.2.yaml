@@ -12,8 +12,6 @@ package:
       - ${{package.name}}-config
       - libxml2
       - wolfi-baselayout
-
-      
 environment:
   contents:
     packages:
