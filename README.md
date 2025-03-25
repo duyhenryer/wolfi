@@ -1,6 +1,6 @@
 # Wolfi-OS PHP Repository
 
-This Repository contains popular PHP extensions pre-compiled to be used in Wolfi-OS. [I am trying to upstream all packages to the official repository](https://github.com/wolfi-dev/os/pulls?q=+is%3Apr+author%3Ashyim+).
+This Repository contains popular PHP extensions pre-compiled to be used in Wolfi-OS. [I am trying to upstream all packages to the official repository](https://github.com/wolfi-dev/os/pulls?q=+is%3Apr+author%3Aduyhenryer+).
 The packages are all built for x86_64 and aarch64. A GitHub bot is automatically updating the packages and opens a new PR if a new version is available. 
 The repository is hosted with Cloudflare R2 storage and with good caching rules, so it should be fast world-wide. 
 
@@ -12,7 +12,7 @@ The repository is hosted with Cloudflare R2 storage and with good caching rules,
 ```docker
 FROM cgr.dev/chainguard/wolfi-base
 
-RUN echo "https://wolfi.shyim.me" >> /etc/apk/repositories && \
+RUN echo "https://wolfi.duyhenryer.me" >> /etc/apk/repositories && \
 cat <<EOF > /etc/apk/keys/php-signing.rsa.pub
 -----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA9s0rytmiqI5l6IgwLqiD
@@ -45,10 +45,10 @@ RUN ...
 contents:
   keyring:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
-+    - https://wolfi.shyim.me/php-signing.rsa.pub
++    - https://wolfi.duyhenryer.me/php-signing.rsa.pub
   repositories:
     - https://packages.wolfi.dev/os
-+    - https://wolfi.shyim.me
++    - https://wolfi.duyhenryer.me
   packages:
     - wolfi-base
     - frankenphp-8.3
@@ -63,7 +63,7 @@ afterwards all packages of this repository can be installed with `apk add <packa
 There is no web package browser. The easiest way is to use `apk search` to find the package you need.
 
 ```bash
-docker run --rm -it ghcr.io/shyim/wolfi-php/base:latest
+docker run --rm -it ghcr.io/duyhenryer/wolfi-php/base:latest
 apk update
 apk search <term>
 ```
@@ -75,7 +75,7 @@ This repository contains FrankenPHP for PHP 8.2 and 8.3. The package is called `
 A basic example to use FrankenPHP in your Dockerfile:
 
 ```dockerfile
-FROM ghcr.io/shyim/wolfi-php/base:latest
+FROM ghcr.io/duyhenryer/wolfi-php/base:latest
 
 RUN <<EOF
 set -eo pipefail
@@ -118,11 +118,4 @@ To get the excact current version of a package, you can run `apk info php-8.2`.
 
 ### Package updates
 
-[We have a Bot which checks every hour of there is a package update, and opens a PR if there is a new version available.](https://github.com/shyim/wolfi-php/actions/workflows/wolfictl-update-gh.yaml)
-
-## Examples
-
-- [Symfony Demo with FrankenPHP](examples/frankenphp-symfony-demo/)
-- [Symfony Demo with FPM](examples/fpm-symfony-demo/)
-- [Symfony Demo with Nginx](examples/nginx-symfony-demo/)
-- [Symfony Demo with Caddy](examples/caddy-symfony-demo/)
+[We have a Bot which checks every hour of there is a package update, and opens a PR if there is a new version available.](https://github.com/duyhenryer/wolfi-php/actions/workflows/wolfictl-update-gh.yaml)

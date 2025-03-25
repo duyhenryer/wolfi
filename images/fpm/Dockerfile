@@ -1,4 +1,4 @@
-FROM ghcr.io/duyhenryer/wolfi-php/base:latest
+FROM ghcr.io/duyhenryer/wolfi/base:latest
 
 ARG PHP_VERSION=8.3
 
@@ -8,6 +8,7 @@ apk add --no-cache \
     php-${PHP_VERSION}-fpm 
 adduser -u 82 www-data -D
 mkdir -p /var/www/html
+chown www-data:www-data /var/www/html
 EOF
 
 WORKDIR /var/www/html
@@ -26,8 +27,8 @@ ENV PHP_FPM_USER=www-data \
     PHP_ERROR_REPORTING= \
     PHP_DISPLAY_ERRORS=On \
     PHP_DISPLAY_STARTUP_ERRORS=On \
-    PHP_UPLOAD_MAX_FILESIZE=2M \
-    PHP_POST_MAX_SIZE=2M \
+    PHP_UPLOAD_MAX_FILESIZE=8M \
+    PHP_POST_MAX_SIZE=8M \
     PHP_MAX_EXECUTION_TIME=30 \
     PHP_MEMORY_LIMIT=128M \
     PHP_SESSION_HANDLER=files \
