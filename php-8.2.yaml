@@ -25,6 +25,7 @@ environment:
       - sqlite-dev
       - zlib-dev
       - wget
+      
 pipeline:
   - uses: fetch
     with:
