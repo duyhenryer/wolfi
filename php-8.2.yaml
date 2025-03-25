@@ -13,7 +13,6 @@ package:
       - libxml2
       - merged-bin
       - wolfi-baselayout
-
 environment:
   contents:
     packages:
