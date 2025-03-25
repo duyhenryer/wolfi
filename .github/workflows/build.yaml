@@ -13,7 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
-      options: --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor:unconfined
+      options: --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined
+    strategy:
+      matrix:
+        arch:
+          - x86_64
+          - aarch64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,7 +74,7 @@ jobs:
             packageName=${file%.yaml}
             mkdir -p "${packageName}"
             melange build \
-              --arch x86_64 \
+              --arch ${{ matrix.arch }} \
               --generate-index=false \
               -r https://packages.wolfi.dev/os \
               -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
@@ -77,7 +82,7 @@ jobs:
               --git-repo-url=https://github.com/duyhenryer/wolfi \
               --git-commit=${{ github.sha }} \
               --source-dir=./${packageName} \
-              $file || echo "Build failed for $file, continuing to index existing packages"
+              $file || echo "Build failed for $file on ${{ matrix.arch }}, continuing to index existing packages"
           done
 
       - name: Upload packages and index
@@ -88,8 +93,8 @@ jobs:
           rclone copy wolfi-melange.rsa.pub Packages:wolfi/
           rclone copy packages Packages:wolfi
           melange index \
-            --arch x86_64 \
+            --arch ${{ matrix.arch }} \
             -m \
             --signing-key wolfi-melange.rsa \
-            packages/x86_64/*.apk || echo "No new packages to index"
-          rclone copy packages/x86_64/APKINDEX.tar.gz Packages:wolfi/x86_64/
+            packages/${{ matrix.arch }}/*.apk || echo "No new packages to index for ${{ matrix.arch }}"
+          rclone copy packages/${{ matrix.arch }}/APKINDEX.tar.gz Packages:wolfi/${{ matrix.arch }}/
