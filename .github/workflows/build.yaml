@@ -6,12 +6,6 @@ on:
       - main
     paths:
       - '*.yaml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '*.yaml'
-  workflow_dispatch:
 
 jobs:
   build:

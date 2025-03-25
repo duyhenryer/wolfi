@@ -29,7 +29,7 @@ jobs:
 
             - name: Look for changed files
               id: changes
-              uses: tj-actions/changed-files@v45
+              uses: tj-actions/changed-files@v46
               with:
                 files_yaml: |
                   melange:
@@ -47,6 +47,6 @@ jobs:
                         -r https://packages.wolfi.dev/os \
                         -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
                         -r https://wolfi.duyne.me \
-                        -k https://wolfi.duyne.me/php-signing.rsa.pub \
+                        -k https://wolfi.duyne.me/wolfi-melange.rsa.pub \
                         $file
                 done
