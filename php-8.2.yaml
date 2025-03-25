@@ -113,4 +113,3 @@ test:
     - runs: |
         php --version
         php /tmp/hello.php <<<'<?php echo "Hello, Wolfi!";'
-
