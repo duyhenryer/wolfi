@@ -20,7 +20,7 @@ jobs:
       cancel-in-progress: false
     strategy:
       matrix:
-        arch: [x86_64]  # Chỉ giữ x86_64, tạm disable aarch64
+        arch: [x86_64]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
@@ -71,6 +71,16 @@ jobs:
         run: |
           echo "${{ secrets.SIGNING_KEY }}" | base64 -d > wolfi-melange.rsa
 
+      - name: Debug signing key
+        run: |
+          if [ -s wolfi-melange.rsa ]; then
+            echo "Signing key exists and has content:"
+            head -n 5 wolfi-melange.rsa
+          else
+            echo "Error: Signing key file is empty or not created"
+            exit 1
+          fi
+
       - name: Build packages
         run: |
           for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
@@ -91,7 +101,7 @@ jobs:
               --git-commit=${{ github.sha }} \
               --source-dir=./${packageName} \
               --log-level debug \
-              $file || echo "Build failed for $file on ${{ matrix.arch }}, continuing to index"
+              $file
           done
 
       - name: Index packages
@@ -105,22 +115,3 @@ jobs:
           else
             echo "No packages to index for ${{ matrix.arch }}"
           fi
-
-      - name: Upload to R2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          if [ -d "packages/${{ matrix.arch }}" ]; then
-            rclone copy packages Packages:wolfi/${{ matrix.arch }}
-            rclone copy packages/${{ matrix.arch }}/APKINDEX.tar.gz .
-          else
-            echo "No packages directory for ${{ matrix.arch }}, skipping upload"
-          fi
-
-      - name: Purge cache
-        uses: jakejarvis/cloudflare-purge-action@master
-        env:
-          CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
-          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-          PURGE_URLS: '["https://wolfi.duyne.me/x86_64/APKINDEX.tar.gz"]'  # Chỉ giữ x86_64
