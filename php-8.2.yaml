@@ -142,6 +142,7 @@ pipeline:
         --enable-sysvmsg=shared \
         --with-ffi=shared
 
+
   - uses: autoconf/make
     with:
       dir: $HOME/php-${{package.version}}
