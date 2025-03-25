@@ -71,16 +71,6 @@ jobs:
         run: |
           echo "${{ secrets.SIGNING_KEY }}" | base64 -d > wolfi-melange.rsa
 
-      - name: Debug signing key
-        run: |
-          if [ -s wolfi-melange.rsa ]; then
-            echo "Signing key exists and has content:"
-            head -n 5 wolfi-melange.rsa
-          else
-            echo "Error: Signing key file is empty or not created"
-            exit 1
-          fi
-
       - name: Build packages
         run: |
           for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
@@ -104,19 +94,7 @@ jobs:
               $file
           done
 
-      - name: Index packages
-        run: |
-          if ls packages/${{ matrix.arch }}/*.apk >/dev/null 2>&1; then
-            melange index \
-              --arch ${{ matrix.arch }} \
-              -m \
-              --signing-key wolfi-melange.rsa \
-              packages/${{ matrix.arch }}/*.apk
-          else
-            echo "No packages to index for ${{ matrix.arch }}"
-          fi
-
-      - name: Upload to R2 Registry
+      - name: Index packages and Upload to R2 Registry
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
