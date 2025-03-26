@@ -348,3 +348,5 @@ test:
         php --version
         php --help
         php /tmp/hello.php <<<'<?php echo "Hello, Wolfi!";'
+
+
