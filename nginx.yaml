@@ -1,0 +1,85 @@
+package:
+  name: nginx
+  version: 1.26.0
+  epoch: 0
+  description: "High-performance HTTP server and reverse proxy"
+  copyright:
+    - license: BSD-2-Clause
+  dependencies:
+    provides:
+      - nginx=${{package.full-version}}
+    runtime:
+      - ca-certificates-bundle
+      - wolfi-baselayout
+
+environment:
+  contents:
+    packages:
+      - build-base
+      - busybox
+      - openssl-dev
+      - pcre2-dev
+      - zlib-dev
+      - wget
+
+pipeline:
+  - uses: fetch
+    with:
+      uri: https://nginx.org/download/nginx-${{package.version}}.tar.gz
+      expected-sha256: d85322f5ac3ab94c9e0ecca51c441c43e6e4c29e2e0f9e22e9d0470f0e424cc8
+      extract: false
+
+  - name: Prepare Build Folder
+    runs: |
+      mv nginx-${{package.version}}.tar.gz $HOME
+      tar zxf $HOME/nginx-${{package.version}}.tar.gz
+
+  - name: Configure
+    runs: |
+      cd $HOME/nginx-${{package.version}}
+      ./configure \
+        --prefix=/usr \
+        --sbin-path=/usr/sbin/nginx \
+        --conf-path=/etc/nginx/nginx.conf \
+        --pid-path=/var/run/nginx.pid \
+        --lock-path=/var/run/nginx.lock \
+        --http-log-path=/var/log/nginx/access.log \
+        --error-log-path=/var/log/nginx/error.log \
+        --with-http_ssl_module \
+        --with-pcre \
+        --with-zlib
+
+  - uses: autoconf/make
+    with:
+      dir: $HOME/nginx-${{package.version}}
+
+  - name: Make Install
+    runs: |
+      cd $HOME/nginx-${{package.version}}
+      INSTALL_ROOT=${{targets.destdir}} DESTDIR=${{targets.destdir}} make install
+
+  - uses: strip
+
+subpackages:
+  - name: ${{package.name}}-config
+    description: "Nginx configuration files"
+    dependencies:
+      provides:
+        - nginx-config=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p ${{targets.subpkgdir}}/etc/nginx
+          mv ${{targets.destdir}}/etc/nginx ${{targets.subpkgdir}}/etc/nginx
+          echo 'worker_processes 1;\nevents {\n  worker_connections 1024;\n}\nhttp {\n  server {\n    listen 80;\n    location / {\n      return 200 "Hello from Nginx on Wolfi!";\n    }\n  }\n}' > ${{targets.subpkgdir}}/etc/nginx/nginx.conf
+
+update:
+  enabled: true
+  manual: false
+  release-monitor:
+    identifier: 11583  # Nginx trên release-monitoring.org
+
+test:
+  pipeline:
+    - runs: |
+        nginx -v
+        nginx -t -c /etc/nginx/nginx.conf
