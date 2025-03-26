@@ -62,8 +62,8 @@ jobs:
       - name: Build and push php-fpm image
         uses: docker/build-push-action@v6
         with:
-          context: images/php-fpm
-          file: images/php-fpm/Dockerfile
+          context: images/php/fpm
+          file: images/php/fpm/Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/duyhenryer/wolfi/php-fpm:${{ matrix.php }}
           build-args: PHP_VERSION=${{ matrix.php }}
