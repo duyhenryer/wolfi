@@ -1,6 +1,6 @@
 FROM ghcr.io/duyhenryer/wolfi/base:latest
 
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.2
 
 RUN <<EOF
 set -eo pipefail

@@ -1,20 +1,20 @@
 FROM cgr.dev/chainguard/wolfi-base:latest
 
 RUN echo "https://wolfi.duyne.me" > /etc/apk/repositories && \
-echo "https://packages.wolfi.dev/os" >> /etc/apk/repositories && \
-cat <<EOF > /etc/apk/keys/melange.rsa.pub
+    echo "https://packages.wolfi.dev/os" >> /etc/apk/repositories && \
+    cat <<EOF > /etc/apk/keys/wolfi-melange.rsa.pub
 -----BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1kuqmxeTo+oBBp9kolVx
-IFuHULV3G+wglqvGgctGxlN6Q6YNOW0+KyT+Z0UF/+U/9qUDH6l8DXroQS/w0emv
-lIk5Xv03nMTcrJ9Jo6ljqthI3Y9Ku13GnV6nCoCfUW/UZzgWeoUu4C3gRGEqHLHz
-vtIY18iTJg312WjN0t85V0OGkMevzuKFCCY4ngnhysInlB9/N1MfWSyAnc2wC8rj
-XZocAh/IRxsu96fIPhljL2ggFQezJUn3onDC1rrJIOCSUm0vcerB636jRTdukRvX
-NJXe7V4GxbAyOSlekXKmYlCIkqRpEmKkRf4H+jCMFoSrHAPbU1IA7TkLR2q6uMD2
-f6de8qTO8oEINCrRKpjMMMY7uyg3H+57rkSwPBSrz7di1ZlvOSypUwm/fYcyt3lF
-BFsvBH/Th8QlYHQVsYQ/K4Mwtcl1h7SmwzABiOhmGLLQmGUS2rj0Sk/e5KfZ0gt4
-1fg3mvVkTl40mQdMNFBXvqe0w/PXjkAlK6epoDtBpSS/Sx7mmUvKxVU9/572lGK3
-enkRZDywTZuh2kS//8uG0zGNUXWSy2xftG3Kw369aneZ41ZesQhG0xKmyW/2Of1S
-vXDEjEeob9dYZjlbs5RVKrjSPX4mwh4LMj7HsdkBHVZ8d2nuVekq8vbbRgkcSa5e
-tbmdukAIJyoKLCSGREe0VnUCAwEAAQ==
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5AqGblXA57jN4PbrDgVl
+OpTCOlRdT+LVzVBlYiYCRYk6pFCQ2yNXx1f9nmT02mv9G82tMSC3pjc/pij/mdCB
+eBCukBMSzgT7LAFejrATnKhGgwzSk38xdRhpKUuQcxrzxSu9pWjasn3Hkkz0AsCz
+FM9K9vrNWgX7C0juUqH0IkdpvtMj2AoERbu08h3qSHN5XN0GurhCQM9yyNULwGbS
+2CPeIPGpsTwsR5iqR0LrEr8771X3AIdxJVCZro2qwhV7X3+RubZpMtmAdVhoQj5T
+IHW1+sq4sgVmn5bJ6MfNDc/zvilFaXyNaTK7vLD7UUU1F3JkHQlGVSPKX9LcBoQ0
+aJDJn47L156zc1NmMnb8yFhQ/JE3KwuSbwP5gsKTMTsedmTHmjEj87UIrxcpqhW7
+EgknlWanim8lq6JHEn9JY9Y7sjy/KOEEz1l9TUN/tAoTjsesfTS/PXF7mDa9jqVv
+sZC1cKLIi+N1orXRiyj4K11qkqHNCnGfSMhvU/OzMry3vc9FMdpw1nEAzONtzQkS
+Fxbl8FPwyUal61TdTlTasrmHw+HUIbw3Nmxhz5GmSmp3yssdEJ5BnQV5k9OxIXYP
+D1o8paH76f3ieCLfEus0vZwAMsiy2Y6J58cgSbat+MIzlp6coTCX1uGYt5SoSZMa
+aPWJdfQ1lfLFRtlQEeZHtPkCAwEAAQ==
 -----END PUBLIC KEY-----
 EOF
