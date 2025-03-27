@@ -26,7 +26,7 @@ pipeline:
   - uses: fetch
     with:
       uri: https://nginx.org/download/nginx-${{package.version}}.tar.gz
-      expected-sha256: d85322f5ac3ab94c9e0ecca51c441c43e6e4c29e2e0f9e22e9d0470f0e424cc8
+      expected-sha256: d2e6c8439d6c6db5015d8eaab2470ab52aef85a7bf363182879977e084370497
       extract: false
 
   - name: Prepare Build Folder
@@ -37,7 +37,7 @@ pipeline:
   - name: Configure
     runs: |
       cd $HOME/nginx-${{package.version}}
-      ./configure \
+      CFLAGS="-O2" ./configure \
         --prefix=/usr \
         --sbin-path=/usr/sbin/nginx \
         --conf-path=/etc/nginx/nginx.conf \
@@ -46,8 +46,7 @@ pipeline:
         --http-log-path=/var/log/nginx/access.log \
         --error-log-path=/var/log/nginx/error.log \
         --with-http_ssl_module \
-        --with-pcre \
-        --with-zlib
+        --with-pcre
 
   - uses: autoconf/make
     with:
