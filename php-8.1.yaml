@@ -1,0 +1,169 @@
+package:
+  name: php-8.1
+  version: 8.1.32
+  epoch: 0
+  description: "the PHP programming language"
+  copyright:
+    - license: PHP-3.01
+  dependencies:
+    provides:
+      - php=${{package.full-version}}
+    runtime:
+      - ${{package.name}}-config
+      - libxml2
+      - wolfi-baselayout
+
+environment:
+  contents:
+    packages:
+      - autoconf
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+      - libxml2-dev
+      - openssl-dev
+      - zlib-dev
+
+pipeline:
+  - uses: git-checkout
+    with:
+      repository: https://github.com/php/php-src
+      tag: php-${{package.version}}
+      expected-commit: aa4bed90d8927de8c2648ea5f3f4a32c56301b71
+
+  - name: Configure
+    runs: |
+      ./buildconf --force
+      ./configure \
+        --prefix=/usr \
+        --libdir=/usr/lib/php \
+        --with-config-file-path=/etc/php \
+        --with-config-file-scan-dir=/etc/php/conf.d \
+        --enable-cli \
+        --enable-fpm \
+        --with-libxml \
+        --with-openssl=shared \
+        --with-zlib \
+        --enable-mbstring=shared \
+        --enable-pdo=shared \
+        --with-pdo-sqlite=shared
+
+  - uses: autoconf/make
+
+  - name: Make Install
+    runs: |
+      INSTALL_ROOT=${{targets.destdir}} DESTDIR=${{targets.destdir}} make install
+
+  - uses: strip
+
+subpackages:
+  - name: ${{package.name}}-config
+    dependencies:
+      provides:
+        - php-config=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p "${{targets.subpkgdir}}/etc/php/conf.d"
+          mv $HOME/php.ini-production ${{targets.subpkgdir}}/etc/php/php.ini
+
+  - name: ${{package.name}}-fpm
+    description: PHP 8.1 FastCGI Process Manager (FPM)
+    dependencies:
+      runtime:
+        - "${{package.name}}-fpm-config"
+        - wolfi-baselayout
+      provides:
+        - php-fpm=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p ${{targets.subpkgdir}}/usr/sbin
+          mv ${{targets.destdir}}/usr/sbin/php-fpm ${{targets.subpkgdir}}/usr/sbin/
+
+  - name: ${{package.name}}-fpm-config
+    description: PHP 8.1 FastCGI Process Manager (FPM) configuration
+    dependencies:
+      provides:
+        - php-fpm-config=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p ${{targets.subpkgdir}}/etc/php/php-fpm.d"
+          mv ${{targets.destdir}}/etc/php/php-fpm.conf.default ${{targets.subpkgdir}}/etc/php/php-fpm.conf
+          mv ${{targets.destdir}}/etc/php/php-fpm.d/www.conf.default ${{targets.subpkgdir}}/etc/php/php-fpm.d/www.conf
+          echo '[global]' > ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+          echo 'error_log = /proc/self/fd/2' >> ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+          echo 'daemonize = no' >> ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+          echo '[www]' >> ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+          echo 'listen = [::]:9000' >> ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+
+  - name: ${{package.name}}-mbstring
+    description: "Multibyte String Functions extension"
+    dependencies:
+      runtime:
+        - wolfi-baselayout
+      provides:
+        - php-mbstring=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p "${{targets.subpkgdir}}/usr/lib/php/modules"
+          mv "${{targets.destdir}}/usr/lib/php/modules/mbstring.so" "${{targets.subpkgdir}}/usr/lib/php/modules/mbstring.so"
+          mkdir -p "${{targets.subpkgdir}}/etc/php/conf.d"
+          echo "extension=mbstring.so" > "${{targets.subpkgdir}}/etc/php/conf.d/10-mbstring.ini"
+
+  - name: ${{package.name}}-openssl
+    description: "OpenSSL extension"
+    dependencies:
+      runtime:
+        - wolfi-baselayout
+      provides:
+        - php-openssl=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p "${{targets.subpkgdir}}/usr/lib/php/modules"
+          mv "${{targets.destdir}}/usr/lib/php/modules/openssl.so" "${{targets.subpkgdir}}/usr/lib/php/modules/openssl.so"
+          mkdir -p "${{targets.subpkgdir}}/etc/php/conf.d"
+          echo "extension=openssl.so" > "${{targets.subpkgdir}}/etc/php/conf.d/10-openssl.ini"
+
+  - name: ${{package.name}}-pdo
+    description: "PHP Data Objects extension"
+    dependencies:
+      runtime:
+        - wolfi-baselayout
+      provides:
+        - php-pdo=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p "${{targets.subpkgdir}}/usr/lib/php/modules"
+          mv "${{targets.destdir}}/usr/lib/php/modules/pdo.so" "${{targets.subpkgdir}}/usr/lib/php/modules/pdo.so"
+          mkdir -p "${{targets.subpkgdir}}/etc/php/conf.d"
+          echo "extension=pdo.so" > "${{targets.subpkgdir}}/etc/php/conf.d/10-pdo.ini"
+
+  - name: ${{package.name}}-pdo_sqlite
+    description: "SQLite 3.x driver for PDO"
+    dependencies:
+      runtime:
+        - ${{package.name}}-pdo
+        - wolfi-baselayout
+      provides:
+        - php-pdo_sqlite=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p "${{targets.subpkgdir}}/usr/lib/php/modules"
+          mv "${{targets.destdir}}/usr/lib/php/modules/pdo_sqlite.so" "${{targets.subpkgdir}}/usr/lib/php/modules/pdo_sqlite.so"
+          mkdir -p "${{targets.subpkgdir}}/etc/php/conf.d"
+          echo "extension=pdo_sqlite.so" > "${{targets.subpkgdir}}/etc/php/conf.d/20-pdo_sqlite.ini"
+
+update:
+  enabled: true
+  github:
+    identifier: php/php-src
+    strip-prefix: php-
+    tag-filter: php-8.1
+    use-tag: true
+
+test:
+  pipeline:
+    - runs: |
+        php --version
+    - runs: |
+        echo '<?php echo "Hello, Wolfi!";' > /tmp/hello.php
+        php /tmp/hello.php
