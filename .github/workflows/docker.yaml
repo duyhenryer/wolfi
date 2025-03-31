@@ -69,3 +69,29 @@ jobs:
           build-args: PHP_VERSION=${{ matrix.php }}
           push: true
           provenance: false
+  nginx:
+    runs-on: ubuntu-latest
+    needs: check-upstream
+    if: ${{ github.event_name != 'schedule' || needs.check-upstream.outputs.should_build == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push nginx image
+        uses: docker/build-push-action@v6
+        with:
+          context: images/nginx
+          file: images/nginx/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/duyhenryer/wolfi/nginx:1.26.0
+          push: true
+          provenance: false
