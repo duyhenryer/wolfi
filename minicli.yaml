@@ -22,7 +22,7 @@ pipeline:
     with:
       repository: https://github.com/minicli/minicli
       tag: v${{package.version}}
-      expected-commit: 7e1b6e8a2b5f2e1b5b2e1b5b2e1b5b2e1b5b2e1b5b2e
+      expected-commit: 1675c0609205c106bb7c2353888dec361808d92e
 
   - name: Install minicli
     runs: |
