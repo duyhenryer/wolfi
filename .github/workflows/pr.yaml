@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - "*.yaml"
-
+permissions:
+  contents: read
+  pull-requests: read
+  
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -37,9 +40,6 @@ jobs:
         if: steps.changes.outputs.melange_all_changed_files != ''
         run: |
           for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
-            if [[ $file == ".yam.yaml" ]]; then
-              continue
-            fi
             melange build \
               --arch x86_64 \
               -r https://packages.wolfi.dev/os \

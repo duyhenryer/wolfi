@@ -2,15 +2,15 @@ package:
   name: nginx
   version: 1.26.0
   epoch: 0
-  description: "High-performance HTTP server and reverse proxy"
+  description: "High performance web server"
   copyright:
     - license: BSD-2-Clause
   dependencies:
-    provides:
-      - nginx=${{package.full-version}}
     runtime:
-      - ca-certificates-bundle
+      - openssl
+      - pcre2
       - wolfi-baselayout
+      - zlib
 
 environment:
   contents:
@@ -26,50 +26,50 @@ pipeline:
   - uses: fetch
     with:
       uri: https://nginx.org/download/nginx-${{package.version}}.tar.gz
-      expected-sha256: d2e6c8439d6c6db5015d8eaab2470ab52aef85a7bf363182879977e084370497
-      extract: false
+      expected-sha256: 31327d30a6ff81e5e4a1a442ad183859bc0d751d1e06a2e84dc7a1af416229
 
-  - name: Prepare Build Folder
-    runs: |
-      mv nginx-${{package.version}}.tar.gz $HOME
-      tar zxf $HOME/nginx-${{package.version}}.tar.gz
-
-  - name: Configure
-    runs: |
-      cd $HOME/nginx-${{package.version}}
-      CFLAGS="-O2" ./configure \
+  - uses: autoconf/configure
+    with:
+      opts: |
         --prefix=/usr \
         --sbin-path=/usr/sbin/nginx \
         --conf-path=/etc/nginx/nginx.conf \
         --pid-path=/var/run/nginx.pid \
         --lock-path=/var/run/nginx.lock \
-        --http-log-path=/var/log/nginx/access.log \
-        --error-log-path=/var/log/nginx/error.log \
+        --http-client-body-temp-path=/var/cache/nginx/client_temp \
+        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+        --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+        --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+        --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+        --user=nginx \
+        --group=nginx \
+        --with-threads \
         --with-http_ssl_module \
-        --with-pcre
+        --with-http_v2_module \
+        --with-http_realip_module \
+        --with-http_addition_module \
+        --with-http_sub_module \
+        --with-http_dav_module \
+        --with-http_flv_module \
+        --with-http_mp4_module \
+        --with-http_gunzip_module \
+        --with-http_gzip_static_module \
+        --with-http_random_index_module \
+        --with-http_secure_link_module \
+        --with-http_stub_status_module \
+        --with-http_auth_request_module \
+        --with-mail \
+        --with-mail_ssl_module \
+        --with-stream \
+        --with-stream_ssl_module \
+        --with-stream_realip_module \
+        --with-stream_ssl_preread_module
 
   - uses: autoconf/make
-    with:
-      dir: $HOME/nginx-${{package.version}}
 
-  - name: Make Install
-    runs: |
-      cd $HOME/nginx-${{package.version}}
-      INSTALL_ROOT=${{targets.destdir}} DESTDIR=${{targets.destdir}} make install
+  - uses: autoconf/make-install
 
   - uses: strip
-
-subpackages:
-  - name: ${{package.name}}-config
-    description: "Nginx configuration files"
-    dependencies:
-      provides:
-        - nginx-config=${{package.full-version}}
-    pipeline:
-      - runs: |
-          mkdir -p ${{targets.subpkgdir}}/etc/nginx
-          mv ${{targets.destdir}}/etc/nginx ${{targets.subpkgdir}}/etc/nginx
-          echo 'worker_processes 1;\nevents {\n  worker_connections 1024;\n}\nhttp {\n  server {\n    listen 80;\n    location / {\n      return 200 "Hello from Nginx on Wolfi!";\n    }\n  }\n}' > ${{targets.subpkgdir}}/etc/nginx/nginx.conf
 
 update:
   enabled: true
@@ -81,4 +81,3 @@ test:
   pipeline:
     - runs: |
         nginx -v
-        nginx -t -c /etc/nginx/nginx.conf
