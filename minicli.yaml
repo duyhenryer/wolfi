@@ -45,7 +45,6 @@ subpackages:
           exec php /usr/share/php/minicli/minicli "$@"
           EOF
           chmod +x ${{targets.subpkgdir}}/usr/bin/minicli
-
 update:
   enabled: false
   # reason: "Fixed to version 4.2.0 for compatibility with existing applications"
