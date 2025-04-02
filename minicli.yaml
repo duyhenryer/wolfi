@@ -1,6 +1,6 @@
 package:
   name: minicli
-  version: 0.5.0
+  version: 4.2.0
   epoch: 0
   description: "Minimalist CLI framework for PHP"
   copyright:
@@ -22,7 +22,7 @@ pipeline:
     with:
       repository: https://github.com/minicli/minicli
       tag: v${{package.version}}
-      expected-commit: 1675c0609205c106bb7c2353888dec361808d92e
+      expected-commit: 1675c0609205c106bb7c2353888dec361808d92
 
   - name: Install minicli
     runs: |
@@ -47,8 +47,4 @@ subpackages:
           chmod +x ${{targets.subpkgdir}}/usr/bin/minicli
 
 update:
-  enabled: true
-  github:
-    identifier: minicli/minicli
-    strip-prefix: v
-    use-tag: true
+  enabled: false
