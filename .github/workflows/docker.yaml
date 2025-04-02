@@ -117,7 +117,7 @@ jobs:
           context: images/minicli
           file: images/minicli/Dockerfile
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/duyhenryer/wolfi/minicli:0.5.0
+          tags: ghcr.io/duyhenryer/wolfi/minicli:4.2.0
           build-args: PHP_VERSION=8.2
           push: true
           provenance: false
