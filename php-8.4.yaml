@@ -3,8 +3,8 @@ package:
   version: 8.4.1
   epoch: 1
   description: "the PHP programming language"
-  target-architecture:
-    - x86_64
+  # target-architecture:
+  #   - x86_64
   copyright:
     - paths:
         - "*"
