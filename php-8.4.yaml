@@ -3,8 +3,6 @@ package:
   version: 8.4.1
   epoch: 1
   description: "The PHP programming language"
-  # target-architecture:
-  #   - x86_64
   copyright:
     - paths:
         - "*"
@@ -41,7 +39,7 @@ pipeline:
   - name: Configure
     runs: |
       ./configure \
-        --prefix=${{targets.destdir}} \
+        --prefix=/usr \
         --bindir=/usr/bin \
         --enable-cli \
         --enable-cgi \
@@ -50,18 +48,35 @@ pipeline:
         --with-readline \
         --with-zlib
   - uses: autoconf/make
-  - runs: |
+  - name: Install
+    runs: |
+      mkdir -p ${{targets.destdir}}/usr/bin
       make install DESTDIR=${{targets.destdir}}
-  - runs: |
       ls -l ${{targets.destdir}}/usr/bin/
   - uses: strip
   - runs: |
       ls -l ${{targets.destdir}}/usr/bin/
+
 subpackages:
   - name: php-dev
     description: PHP 8.4 development headers
     pipeline:
-      - uses: split/dev
+      - runs: |
+          PACKAGE_DIR="${{targets.destdir}}"
+          DEST_DIR="${{targets.subpkgdir}}"
+          mkdir -p "$DEST_DIR/usr/include" "$DEST_DIR/usr/lib" "$DEST_DIR/usr/bin"
+          # Move headers
+          mv "$PACKAGE_DIR/usr/include/php" "$DEST_DIR/usr/include/" || true
+          # Move static libraries and pkgconfig files
+          find "$PACKAGE_DIR/usr/lib" -name '*.a' -exec mv {} "$DEST_DIR/usr/lib/" \; || true
+          find "$PACKAGE_DIR/usr/lib" -name '*.so' -type l -exec mv {} "$DEST_DIR/usr/lib/" \; || true
+          # Move development tools, exclude runtime binaries
+          mv "$PACKAGE_DIR/usr/bin/phpize" "$DEST_DIR/usr/bin/" || true
+          mv "$PACKAGE_DIR/usr/bin/php-config" "$DEST_DIR/usr/bin/" || true
+          # Move man pages for development tools
+          mkdir -p "$DEST_DIR/php/man/man1"
+          mv "$PACKAGE_DIR/php/man/man1/phpize.1" "$DEST_DIR/php/man/man1/" || true
+          mv "$PACKAGE_DIR/php/man/man1/php-config.1" "$DEST_DIR/php/man/man1/" || true
   - name: php-cgi
     description: PHP 8.4 CGI
     pipeline:
