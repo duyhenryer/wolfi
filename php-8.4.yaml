@@ -52,8 +52,11 @@ pipeline:
   - uses: autoconf/make
   - runs: |
       make install DESTDIR=${{targets.destdir}}
+  - runs: |
+      ls -l ${{targets.destdir}}/usr/bin/
   - uses: strip
-
+  - runs: |
+      ls -l ${{targets.destdir}}/usr/bin/
 subpackages:
   - name: php-dev
     description: PHP 8.4 development headers
