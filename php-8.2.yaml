@@ -333,6 +333,7 @@ subpackages:
             echo; \
             echo 'decorate_workers_output = no'; \
           } | tee ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+
 update:
   enabled: true
   github:
@@ -346,4 +347,10 @@ test:
     - runs: |
         php --version
         php --help
-        php /tmp/hello.php <<<'<?php echo "Hello, Wolfi!";'
+    - runs: |
+        cat <<'EOF' >> /tmp/hello.php
+        <?php
+        echo 'Hello, Wolfi!';
+        EOF
+
+        php /tmp/hello.php

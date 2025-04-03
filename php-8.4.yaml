@@ -1,99 +1,347 @@
 package:
-  name: php
-  version: 8.4.1
-  epoch: 1
-  description: "The PHP programming language"
+  name: php-8.4
+  version: 8.4.5
+  epoch: 0
+  description: "the PHP programming language"
   copyright:
-    - paths:
-        - "*"
-      attestation: Verified
-      license: PHP-3.01
+    - license: PHP-3.01
   dependencies:
+    provides:
+      - php=${{package.full-version}}
     runtime:
+      - ${{package.name}}-config
       - libxml2
+      - merged-bin
+      - wolfi-baselayout
 
 environment:
   contents:
-    repositories:
-      - https://packages.wolfi.dev/os
-      - https://wolfi.duyne.me
-    keyring:
-      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
-      - https://wolfi.duyne.me/wolfi-melange.rsa.pub
     packages:
-      - busybox
-      - ca-certificates-bundle
+      - aom-dev
+      - autoconf
+      - bison
       - build-base
+      - busybox
       - bzip2-dev
-      - libxml2-dev
+      - ca-certificates-bundle
       - curl-dev
+      - dav1d-dev
+      - file
+      - freetds
+      - freetds-dev
+      - freetype-dev
+      - gmp-dev
+      - icu-dev
+      - libavif-dev
+      - libffi-dev
+      - libjpeg-turbo-dev
+      - libpng-dev
+      - libpsl-dev
+      - libsodium-dev
+      - libtool
+      - libwebp-dev
+      - libx11-dev
+      - libxml2-dev
+      - libxpm-dev
+      - libxslt-dev
+      - libzip
+      - nghttp2-dev
+      - oniguruma-dev
+      - openldap-dev
       - openssl-dev
+      - postgresql-dev
+      - re2c
       - readline-dev
       - sqlite-dev
+      - unixodbc-dev
+      - wget
 
 pipeline:
-  - uses: fetch
+  - uses: git-checkout
     with:
-      uri: https://www.php.net/distributions/php-${{package.version}}.tar.gz
-      expected-sha256: c3d1ce4157463ea43004289c01172deb54ce9c5894d8722f4e805461bf9feaec
+      repository: https://github.com/php/php-src
+      tag: php-${{package.version}}
+      expected-commit: 23e05bdcf23319f4922513a91bb0d5e3925d5249
+
   - name: Configure
     runs: |
-      ./configure \
+      ./buildconf --force
+      EXTENSION_DIR=/usr/lib/php/modules ./configure \
         --prefix=/usr \
-        --bindir=/usr/bin \
+        --libdir=/usr/lib/php \
+        --datadir=/usr/share/php \
+        --sysconfdir=/etc/php \
+        --localstatedir=/var \
+        --with-layout=GNU \
+        --with-pic \
+        --with-config-file-path=/etc/php \
+        --with-config-file-scan-dir=/etc/php/conf.d \
         --enable-cli \
-        --enable-cgi \
-        --with-curl \
-        --with-openssl \
+        --enable-ctype=shared \
+        --enable-bcmath=shared \
+        --with-curl=shared \
+        --enable-dom=shared \
+        --enable-fileinfo=shared \
+        --with-iconv=shared \
+        --with-openssl=shared \
         --with-readline \
-        --with-zlib
+        --enable-ftp=shared \
+        --with-sodium=shared \
+        --enable-fpm \
+        --with-pear \
+        --enable-gd=shared \
+            --with-avif \
+            --with-freetype \
+            --with-jpeg \
+            --with-webp \
+            --with-xpm \
+            --disable-gd-jis-conv \
+        --with-libxml \
+        --enable-phar=shared \
+        --enable-mbstring=shared \
+      	--with-mysqli=shared \
+            --with-mysql-sock=/run/mysqld/mysqld.sock \
+        --enable-mysqlnd=shared \
+        --enable-pdo=shared \
+            --with-pdo-mysql=shared,mysqlnd \
+            --with-pdo-sqlite=shared \
+            --with-pdo-dblib=shared \
+            --with-pdo-pgsql=shared \
+            --with-pdo-odbc=shared,unixODBC,/usr \
+        --with-unixODBC=shared,/usr \
+        --enable-pcntl=shared \
+        --enable-sockets=shared \
+        --with-bz2=shared \
+        --enable-calendar=shared \
+        --enable-exif=shared  \
+        --with-gettext=shared  \
+        --with-gmp=shared  \
+        --enable-intl=shared  \
+        --with-ldap=shared  \
+        --enable-opcache=shared  \
+        --enable-soap=shared  \
+        --with-xsl=shared \
+        --with-zlib \
+        --enable-xml=shared \
+        --enable-simplexml=shared \
+        --enable-xml=shared \
+        --enable-xmlreader=shared \
+        --enable-xmlwriter=shared \
+        --enable-posix=shared \
+        --with-pgsql=shared \
+        --with-zip=shared \
+        --enable-shmop=shared \
+        --enable-sysvsem=shared \
+        --enable-sysvshm=shared \
+        --enable-sysvmsg=shared \
+        --with-ffi=shared
+
   - uses: autoconf/make
-  - name: Install
+
+  - name: Make Install
     runs: |
-      mkdir -p ${{targets.destdir}}/usr/bin
-      make install DESTDIR=${{targets.destdir}}
-      echo "Contents of ${{targets.destdir}}/usr/bin after install:"
-      ls -l ${{targets.destdir}}/usr/bin/ || echo "Directory empty or not found"
-      echo "Contents of /usr/bin in sandbox (for debugging):"
-      ls -l /usr/bin/ || echo "Nothing in /usr/bin"
-      # Workaround: Copy from sandbox root if DESTDIR fails
-      [ -d /usr/bin ] && cp -r /usr/* ${{targets.destdir}}/usr/ || echo "No files to copy from /usr"
-      echo "Contents of ${{targets.destdir}}/usr/bin after workaround:"
-      ls -l ${{targets.destdir}}/usr/bin/ || echo "Directory still empty"
+      INSTALL_ROOT=${{targets.destdir}} DESTDIR=${{targets.destdir}} make install
+
   - uses: strip
-  - runs: |
-      echo "Contents of ${{targets.destdir}}/usr/bin after strip:"
-      ls -l ${{targets.destdir}}/usr/bin/ || echo "Directory empty or not found"
+
+data:
+  - name: extensions
+    items:
+      bz2: Bzip2
+      curl: cURL
+      gd: GD imaging
+      gmp: GNU GMP support
+      ldap: LDAP
+      mysqlnd: MySQLnd
+      openssl: OpenSSL
+      pdo_mysql: MySQL driver for PDO
+      pdo_sqlite: SQLite 3.x driver for PDO
+      pdo_dblib: PDO driver for Sybase / MS SQL databases
+      pdo_pgsql: PDO driver for pgsql
+      pdo_odbc: PDO driver for ODBC
+      soap: SOAP
+      sodium: Sodium
+      calendar: Calendar
+      exif: EXIF
+      gettext: GetText
+      intl: Internationalization
+      mbstring: Multibyte String Functions
+      opcache: Opcache
+      pcntl: pcntl
+      pdo: PHP Data Objects
+      phar: PHP Archive
+      sockets: Sockets
+      xsl: XSL
+      bcmath: BC Math
+      ctype: ctype
+      iconv: Iconv
+      dom: DOM
+      pgsql: PostgreSQL
+      posix: Posix
+      shmop: shmop
+      sysvmsg: sysvmsg
+      sysvsem: sysvsem
+      sysvshm: sysvshm
+      simplexml: SimpleXML
+      mysqli: MySQLi
+      xml: XML
+      xmlreader: XMLReader
+      xmlwriter: XMLWriter
+      fileinfo: fileinfo
+      zip: Zip
+      odbc: UnixODBC
+      ftp: FTP
+      ffi: FFI
 
 subpackages:
-  - name: php-dev
-    description: PHP 8.4 development headers
+  - name: ${{package.name}}-config
+    dependencies:
+      provides:
+        - php-config=${{package.full-version}}
     pipeline:
       - runs: |
-          PACKAGE_DIR="${{targets.destdir}}"
-          DEST_DIR="${{targets.subpkgdir}}"
-          mkdir -p "$DEST_DIR/usr/include" "$DEST_DIR/usr/lib" "$DEST_DIR/usr/bin"
-          # Move headers
-          mv "$PACKAGE_DIR/usr/include/php" "$DEST_DIR/usr/include/" || true
-          # Move static libraries and pkgconfig files
-          find "$PACKAGE_DIR/usr/lib" -name '*.a' -exec mv {} "$DEST_DIR/usr/lib/" \; || true
-          find "$PACKAGE_DIR/usr/lib" -name '*.so' -type l -exec mv {} "$DEST_DIR/usr/lib/" \; || true
-          # Move development tools, exclude runtime binaries
-          mv "$PACKAGE_DIR/usr/bin/phpize" "$DEST_DIR/usr/bin/" || true
-          mv "$PACKAGE_DIR/usr/bin/php-config" "$DEST_DIR/usr/bin/" || true
-          # Move man pages for development tools
-          mkdir -p "$DEST_DIR/php/man/man1"
-          mv "$PACKAGE_DIR/php/man/man1/phpize.1" "$DEST_DIR/php/man/man1/" || true
-          mv "$PACKAGE_DIR/php/man/man1/php-config.1" "$DEST_DIR/php/man/man1/" || true
-  - name: php-cgi
-    description: PHP 8.4 CGI
+          mkdir -p "${{targets.subpkgdir}}/etc/php/conf.d"
+          mv $HOME/php.ini-production ${{targets.subpkgdir}}/etc/php/php.ini
+
+  - range: extensions
+    name: "${{package.name}}-${{range.key}}"
+    description: "The ${{range.value}} extension"
+    dependencies:
+      runtime:
+        - "${{package.name}}-${{range.key}}-config"
+        - merged-bin
+        - wolfi-baselayout
+      provides:
+        - php-${{range.key}}=${{package.full-version}}
+    pipeline:
+      - runs: |
+          export EXTENSIONS_DIR=usr/lib/php/modules
+          mkdir -p "${{targets.subpkgdir}}"/$EXTENSIONS_DIR
+          mv "${{targets.destdir}}/$EXTENSIONS_DIR/${{range.key}}.so" \
+            "${{targets.subpkgdir}}/$EXTENSIONS_DIR/${{range.key}}.so"
+
+  - range: extensions
+    name: "${{package.name}}-${{range.key}}-config"
+    description: "The ${{range.value}} extension configuration"
+    dependencies:
+      provides:
+        - php-${{range.key}}-config=${{package.full-version}}
+      runtime:
+        - merged-bin
+        - wolfi-baselayout
+    pipeline:
+      - runs: |
+          export CONF_DIR="${{targets.subpkgdir}}/etc/php/conf.d"
+          mkdir -p $CONF_DIR
+          prefix=
+          [ "${{range.key}}" != "opcache" ] || prefix="zend_"
+          echo "${prefix}extension=${{range.key}}.so" > $CONF_DIR/"${{range.key}}.ini"
+
+  - name: ${{package.name}}-dev
+    description: PHP 8.3 development headers
+    dependencies:
+      provides:
+        - php-dev=${{package.full-version}}
+      runtime:
+        - merged-bin
+        - wolfi-baselayout
+    pipeline:
+      - uses: split/dev
+      - runs: |
+          mkdir -p ${{targets.subpkgdir}}/usr/bin
+          mv ${{targets.destdir}}/usr/bin/phpize ${{targets.subpkgdir}}/usr/bin/
+          mv ${{targets.destdir}}/usr/lib ${{targets.subpkgdir}}/usr
+
+  - name: ${{package.name}}-doc
+    description: PHP 8.3 documentation
+    dependencies:
+      provides:
+        - php-doc=${{package.full-version}}
+    pipeline:
+      - uses: split/manpages
+
+  - name: "${{package.name}}-cgi"
+    description: PHP 8.3 CGI
+    dependencies:
+      provides:
+        - php-cgi=${{package.full-version}}
+      runtime:
+        - merged-bin
+        - wolfi-baselayout
     pipeline:
       - runs: |
           mkdir -p ${{targets.subpkgdir}}/usr/bin
           mv ${{targets.destdir}}/usr/bin/php-cgi ${{targets.subpkgdir}}/usr/bin/
-  - name: php-dbg
+
+  - name: "${{package.name}}-dbg"
     description: Interactive PHP Debugger
+    dependencies:
+      provides:
+        - php-dbg=${{package.full-version}}
+      runtime:
+        - merged-bin
+        - wolfi-baselayout
     pipeline:
       - runs: |
           mkdir -p ${{targets.subpkgdir}}/usr/bin
           mv ${{targets.destdir}}/usr/bin/phpdbg ${{targets.subpkgdir}}/usr/bin/
+
+  - name: "${{package.name}}-fpm"
+    description: PHP 8.3 FastCGI Process Manager (FPM)
+    dependencies:
+      runtime:
+        - "${{package.name}}-fpm-config"
+        - merged-bin
+        - wolfi-baselayout
+      provides:
+        - php-fpm=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p ${{targets.subpkgdir}}/usr/sbin
+          mv ${{targets.destdir}}/usr/sbin/php-fpm ${{targets.subpkgdir}}/usr/sbin/
+
+  - name: ${{package.name}}-fpm-config
+    description: PHP 8.3 FastCGI Process Manager (FPM) configuration
+    dependencies:
+      provides:
+        - php-fpm-config=${{package.full-version}}
+    pipeline:
+      - runs: |
+          mkdir -p ${{targets.subpkgdir}}/etc/php/php-fpm.d
+          mv ${{targets.destdir}}/etc/php/php-fpm.conf.default ${{targets.subpkgdir}}/etc/php/php-fpm.conf
+          mv ${{targets.destdir}}/etc/php/php-fpm.d/www.conf.default ${{targets.subpkgdir}}/etc/php/php-fpm.d/www.conf \
+          && { \
+            echo '[global]'; \
+            echo 'error_log = /proc/self/fd/2'; \
+            echo 'daemonize = no'; \
+            echo; \
+            echo '[www]'; \
+            echo 'listen = [::]:9000'; \
+            echo 'access.log = /proc/self/fd/2'; \
+            echo; \
+            echo 'clear_env = no'; \
+            echo; \
+            echo 'catch_workers_output = yes'; \
+            echo; \
+            echo 'decorate_workers_output = no'; \
+          } | tee ${{targets.subpkgdir}}/etc/php/php-fpm.d/zz-apko.conf
+
+update:
+  enabled: true
+  github:
+    identifier: php/php-src
+    strip-prefix: php-
+    tag-filter: php-8.4
+    use-tag: true
+
+test:
+  pipeline:
+    - runs: |
+        php --version
+    - runs: |
+        cat <<'EOF' >> /tmp/hello.php
+        <?php
+        echo 'Hello, Wolfi!';
+        EOF
+
+        php /tmp/hello.php
