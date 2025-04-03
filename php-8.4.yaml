@@ -44,6 +44,7 @@ pipeline:
         --prefix=${{targets.destdir}} \
         --bindir=/usr/bin \
         --enable-cli \
+        --enable-cgi \
         --with-curl \
         --with-openssl \
         --with-readline \
