@@ -2,13 +2,13 @@ package:
   name: php
   version: 8.4.1
   epoch: 1
-  description: "the PHP programming language"
-  target-architecture:
-    - x86_64
+  description: "The PHP programming language"
+  # target-architecture:
+  #   - x86_64
   copyright:
     - paths:
         - "*"
-      attestation: TODO
+      attestation: Verified
       license: PHP-3.01
   dependencies:
     runtime:
@@ -48,25 +48,25 @@ pipeline:
         --with-openssl \
         --with-readline \
         --with-zlib
-
   - uses: autoconf/make
-  - uses: autoconf/make-install
+  - runs: |
+      make install DESTDIR=${{targets.destdir}}
   - uses: strip
 
 subpackages:
   - name: php-dev
-    description: PHP 8.3 development headers
+    description: PHP 8.4 development headers
     pipeline:
       - uses: split/dev
   - name: php-cgi
-    description: PHP 8.3 CGI
+    description: PHP 8.4 CGI
     pipeline:
       - runs: |
           mkdir -p ${{targets.subpkgdir}}/usr/bin
-          mv ${{targets.destdir}}/bin/php-cgi ${{targets.subpkgdir}}/usr/bin/
+          mv ${{targets.destdir}}/usr/bin/php-cgi ${{targets.subpkgdir}}/usr/bin/
   - name: php-dbg
     description: Interactive PHP Debugger
     pipeline:
       - runs: |
           mkdir -p ${{targets.subpkgdir}}/usr/bin
-          mv ${{targets.destdir}}/bin/phpdbg ${{targets.subpkgdir}}/usr/bin/
+          mv ${{targets.destdir}}/usr/bin/phpdbg ${{targets.subpkgdir}}/usr/bin/
