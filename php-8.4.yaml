@@ -42,6 +42,7 @@ pipeline:
     runs: |
       ./configure \
         --prefix=${{targets.destdir}} \
+        --bindir=/usr/bin \
         --enable-cli \
         --with-curl \
         --with-openssl \
