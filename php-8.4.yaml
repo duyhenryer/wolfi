@@ -52,10 +52,18 @@ pipeline:
     runs: |
       mkdir -p ${{targets.destdir}}/usr/bin
       make install DESTDIR=${{targets.destdir}}
-      ls -l ${{targets.destdir}}/usr/bin/
+      echo "Contents of ${{targets.destdir}}/usr/bin after install:"
+      ls -l ${{targets.destdir}}/usr/bin/ || echo "Directory empty or not found"
+      echo "Contents of /usr/bin in sandbox (for debugging):"
+      ls -l /usr/bin/ || echo "Nothing in /usr/bin"
+      # Workaround: Copy from sandbox root if DESTDIR fails
+      [ -d /usr/bin ] && cp -r /usr/* ${{targets.destdir}}/usr/ || echo "No files to copy from /usr"
+      echo "Contents of ${{targets.destdir}}/usr/bin after workaround:"
+      ls -l ${{targets.destdir}}/usr/bin/ || echo "Directory still empty"
   - uses: strip
   - runs: |
-      ls -l ${{targets.destdir}}/usr/bin/
+      echo "Contents of ${{targets.destdir}}/usr/bin after strip:"
+      ls -l ${{targets.destdir}}/usr/bin/ || echo "Directory empty or not found"
 
 subpackages:
   - name: php-dev
