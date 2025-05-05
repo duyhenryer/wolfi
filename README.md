@@ -1,8 +1,5 @@
-# Wolfi-OS PHP Repository
-
-This Repository contains popular PHP extensions pre-compiled to be used in Wolfi-OS. [I am trying to upstream all packages to the official repository](https://github.com/wolfi-dev/os/pulls?q=+is%3Apr+author%3Aduyhenryer+).
-The packages are all built for x86_64 and aarch64. A GitHub bot is automatically updating the packages and opens a new PR if a new version is available. 
-The repository is hosted with Cloudflare R2 storage and with good caching rules, so it should be fast world-wide. 
+# Wolfi-OS
+The repository is hosted with Cloudflare R2 storage.
 
 ## Installation of Repository
 
@@ -13,7 +10,7 @@ The repository is hosted with Cloudflare R2 storage and with good caching rules,
 FROM cgr.dev/chainguard/wolfi-base
 
 RUN echo "https://wolfi.duyhenryer.me" >> /etc/apk/repositories && \
-cat <<EOF > /etc/apk/keys/php-signing.rsa.pub
+cat <<EOF > /etc/apk/keys/wolfi-melange.rsa.pub 
 -----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA9s0rytmiqI5l6IgwLqiD
 ecg3jwDIHWfzVmzfedTen4KW5MkmUVXgFXbmegD/e4arNzqkw2tpqIkYgKO4G5MF
@@ -45,10 +42,10 @@ RUN ...
 contents:
   keyring:
     - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
-+    - https://wolfi.duyhenryer.me/php-signing.rsa.pub
++    - https://wolfi.duyne.me/wolfi-melange.rsa.pub
   repositories:
     - https://packages.wolfi.dev/os
-+    - https://wolfi.duyhenryer.me
++    - https://wolfi.duyne.me
   packages:
     - wolfi-base
     - frankenphp-8.3
