@@ -32,7 +32,7 @@ jobs:
       #   with:
       #     platforms: linux/${{ matrix.arch == 'x86_64' && 'amd64' || 'arm64' }}
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
