@@ -7,10 +7,7 @@ on:
       - "!.github/**/*.yaml"
       - "!images/**/*.yaml"
       - "!examples/**/*.yaml"
-permissions:
-  contents: read
-  pull-requests: read
-  
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -24,15 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
-      options: --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined
+      options: |
+        --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - name: Generate key
-        run: make init
+        run: melange keygen
 
       - name: Look for changed files
         id: changes
@@ -46,14 +42,13 @@ jobs:
               - '!examples/**/*.yaml'
 
       - name: Build all packages
-        if: steps.changes.outputs.melange_all_changed_files != ''
         run: |
+          make init
           for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
-            if [[ -z "$file" ]] || [[ ! -f "$file" ]]; then
+            if [[ $file == ".yam.yaml" ]]; then
               continue
             fi
             packageName=$(basename $(dirname "$file"))
-            echo "Building package: $packageName"
-            make package/"${packageName}" || { echo "Build failed for $packageName"; exit 1; }
-            make test/"${packageName}" || { echo "Test failed for $packageName"; exit 1; }
+            make package/"${packageName}"
+            make test/"${packageName}"
           done
