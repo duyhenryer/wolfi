@@ -1,7 +1,7 @@
 ---
-name: 'wolfictl-update-gh'
+name: 'wolfictl-update-rm'
 description: |
-  Wolfictl Update From GitHub.
+  Wolfictl Update From Release Monitor.
 
 inputs:
   repository:
@@ -12,6 +12,11 @@ inputs:
   token:
     description: |
       GitHub Token or OctoSts token.
+    required: true
+    default: ""
+  release_monitor_token:
+    description: |
+     Release Monitor token.
     required: true
     default: ""
   git_author_name:
@@ -32,11 +37,13 @@ runs:
   args:
     - update
     - https://github.com/${{ inputs.repository }}
-    - --release-monitoring-query=false
+    - --github-release-query=false
     - --use-gitsign
     - --github-labels=request-version-update
     - --github-labels=automated pr
   env:
     GITHUB_TOKEN: ${{ inputs.token }}
+    RELEASE_MONITOR_TOKEN: ${{ inputs.release_monitor_token }}
     GIT_AUTHOR_NAME: ${{ inputs.git_author_name }}
     GIT_AUTHOR_EMAIL: ${{ inputs.git_author_email }}
+

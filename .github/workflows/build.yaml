@@ -5,7 +5,10 @@ on:
     branches:
       - main
     paths:
-      - '*.yaml'
+      - '**/*.yaml'
+      - '!.github/**/*.yaml'
+      - '!images/**/*.yaml'
+      - '!examples/**/*.yaml'
 
 jobs:
   build:
@@ -17,10 +20,10 @@ jobs:
         include:
           - os: ubuntu-latest
             arch: x86_64
-            platform: amd64
+            deb: amd64
           - os: ubuntu-22.04-arm
             arch: aarch64
-            platform: arm64
+            deb: arm64
     runs-on: ${{ matrix.os }}
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
@@ -40,21 +43,41 @@ jobs:
         run: |
           git config --global --add safe.directory "$(pwd)"
 
+      - name: Cache rclone
+        uses: actions/cache@v4
+        with:
+          path: /tmp/rclone-cache
+          key: rclone-${{ matrix.arch }}-${{ hashFiles('.github/workflows/build.yaml') }}
+          restore-keys: |
+            rclone-${{ matrix.arch }}-
+
       - name: Look for changed files
         id: changes
         uses: tj-actions/changed-files@v47
         with:
           files_yaml: |
             melange:
-              - ./*.yaml
+              - '**/*.yaml'
+              - '!.github/**/*.yaml'
+              - '!images/**/*.yaml'
+              - '!examples/**/*.yaml'
 
       - name: Install rclone
         run: |
-          cd /tmp
-          curl -o rclone.zip -L https://downloads.rclone.org/rclone-current-linux-${{ matrix.arch == 'x86_64' && 'amd64' || 'arm64' }}.zip
-          unzip rclone.zip
-          cp rclone*/rclone /usr/bin/
-          rm -rf rclone*
+          if [ -f "/tmp/rclone-cache/rclone" ]; then
+            echo "Using cached rclone"
+            cp /tmp/rclone-cache/rclone /usr/bin/rclone
+            chmod +x /usr/bin/rclone
+          else
+            echo "Downloading rclone"
+            cd /tmp
+            curl -o rclone.zip -L https://downloads.rclone.org/rclone-current-linux-${{ matrix.deb }}.zip
+            unzip rclone.zip
+            cp rclone*/rclone /usr/bin/
+            mkdir -p /tmp/rclone-cache
+            cp rclone*/rclone /tmp/rclone-cache/
+            rm -rf rclone*
+          fi
 
       - name: Rclone Setup
         run: |
@@ -76,16 +99,15 @@ jobs:
           echo "${{ secrets.SIGNING_KEY }}" | base64 -d > wolfi-melange.rsa
 
       - name: Build packages
+        if: steps.changes.outputs.melange_all_changed_files != ''
         run: |
           for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
-            if [[ $file == ".yam.yaml" ]]; then
-              continue
-            fi
-            packageName=${file%.yaml}
+            packageName=$(basename $(dirname "$file"))
             mkdir -p "${packageName}"
             melange build \
               --arch ${{ matrix.arch }} \
               --generate-index=false \
+              --sbom-path=./sboms \
               -r https://wolfi.duyne.me \
               -k https://wolfi.duyne.me/wolfi-melange.rsa.pub \
               -r https://packages.wolfi.dev/os \
@@ -94,27 +116,56 @@ jobs:
               --git-repo-url=https://github.com/${{ github.repository }} \
               --git-commit=${{ github.sha }} \
               --source-dir=./${packageName} \
-              --log-level debug \
               $file
           done
 
-      - name: Index packages
-        run: |
-          if ls packages/${{ matrix.arch }}/*.apk >/dev/null 2>&1; then
-            melange index \
-              --arch ${{ matrix.arch }} \
-              -m \
-              --signing-key wolfi-melange.rsa \
-              packages/${{ matrix.arch }}/*.apk
-          fi
-
-      - name: Upload to R2
+      - name: Upload to registry
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          ls -al
-          if ls packages/${{ matrix.arch }}/*.apk >/dev/null 2>&1; then
-            rclone copy packages/${{ matrix.arch }} Packages:wolfi/${{ matrix.arch }}/
-            rclone copy APKINDEX.tar.gz Packages:wolfi/${{ matrix.arch }}/
-          fi
+          rclone copy packages Packages:wolfi
+          rclone copy Packages:wolfi/${{ matrix.arch }}/APKINDEX.tar.gz .
+
+          melange index \
+            --arch ${{ matrix.arch }} \
+            -m \
+            --signing-key wolfi-melange.rsa \
+            packages/${{ matrix.arch }}/*.apk
+
+          rclone copy APKINDEX.tar.gz Packages:wolfi/${{ matrix.arch }}/
+
+      - name: Scan packages for CVEs
+        if: always()
+        run: |
+          echo "🔍 Scanning packages for vulnerabilities..."
+          for apk in packages/${{ matrix.arch }}/*.apk; do
+            if [ -f "$apk" ]; then
+              echo "Scanning $(basename $apk)..."
+              wolfictl scan "$apk" || echo "⚠️  CVEs found in $(basename $apk)"
+            fi
+          done
+
+      - name: Upload SBOMs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sboms-${{ matrix.arch }}
+          path: sboms/
+          retention-days: 30
+
+      - name: Upload packages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.arch }}
+          path: packages/${{ matrix.arch }}/
+          retention-days: 7
+
+      - name: Purge cache
+        if: always()
+        uses: jakejarvis/cloudflare-purge-action@master
+        env:
+          CLOUDFLARE_ZONE: ${{ secrets.CLOUDFLARE_ZONE }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+          PURGE_URLS: '["https://wolfi.duyne.me/x86_64/APKINDEX.tar.gz", "https://wolfi.duyne.me/aarch64/APKINDEX.tar.gz"]'
