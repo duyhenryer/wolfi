@@ -353,4 +353,3 @@ test:
         EOF
 
         php /tmp/hello.php
-

@@ -81,4 +81,3 @@ test:
   pipeline:
     - runs: |
         nginx -v
-
