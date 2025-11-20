@@ -28,9 +28,9 @@ pipeline:
       uri: https://nginx.org/download/nginx-${{package.version}}.tar.gz
       expected-sha256: d2e6c8439d6c6db5015d8eaab2470ab52aef85a7bf363182879977e084370497 #31327d30a6ff81e5e4a1a442ad183859bc0d751d1e06a2e84dc7a1af416229
 
-  - uses: autoconf/configure
-    with:
-      opts: |
+  - name: Configure
+    runs: |
+      ./configure \
         --prefix=/usr \
         --sbin-path=/usr/sbin/nginx \
         --conf-path=/etc/nginx/nginx.conf \
@@ -65,9 +65,11 @@ pipeline:
         --with-stream_realip_module \
         --with-stream_ssl_preread_module
 
-  - uses: autoconf/make
+  - runs: |
+      make -j$(nproc)
 
-  - uses: autoconf/make-install
+  - runs: |
+      make install DESTDIR="${{targets.destdir}}"
 
   - uses: strip
 
