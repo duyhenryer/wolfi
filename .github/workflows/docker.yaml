@@ -105,7 +105,7 @@ jobs:
       - name: Extract nginx version
         id: version
         run: |
-          VERSION=$(yq eval '.package.version' nginx/nginx.yaml)
+          VERSION=$(yq eval '.package.version' nginx.yaml)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Nginx version: $VERSION"
       - name: Set up QEMU
@@ -152,7 +152,7 @@ jobs:
       - name: Extract minicli version
         id: version
         run: |
-          VERSION=$(yq eval '.package.version' minicli/minicli.yaml)
+          VERSION=$(yq eval '.package.version' minicli.yaml)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Minicli version: $VERSION"
       - name: Set up QEMU

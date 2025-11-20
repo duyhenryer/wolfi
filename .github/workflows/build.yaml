@@ -5,10 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '**/*.yaml'
-      - '!.github/**/*.yaml'
-      - '!images/**/*.yaml'
-      - '!examples/**/*.yaml'
+      - '*.yaml'
 
 jobs:
   build:
@@ -47,10 +44,7 @@ jobs:
         with:
           files_yaml: |
             melange:
-              - '**/*.yaml'
-              - '!.github/**/*.yaml'
-              - '!images/**/*.yaml'
-              - '!examples/**/*.yaml'
+              - ./*.yaml
 
       - name: Install rclone
         run: |
@@ -85,8 +79,11 @@ jobs:
             if [[ $file == ".yam.yaml" ]]; then
               continue
             fi
-            packageName=$(basename $(dirname "$file"))
+
+            packageName=${file%.yaml}
+
             mkdir -p "${packageName}"
+
             melange build \
               --arch ${{ matrix.arch }} \
               --generate-index=false \

@@ -49,7 +49,7 @@ init:
 
 package/%:
 	$(eval pkgname := $*)
-	$(eval yamlfile := $(pkgname)/$(pkgname).yaml)
+	$(eval yamlfile := $(pkgname).yaml)
 	@if [ ! -f "$(yamlfile)" ]; then \
 		echo "Error: could not find yaml file at $(yamlfile)"; exit 1; \
 	else \
@@ -71,7 +71,7 @@ build:
 	fi
 	@mkdir -p ./$(package)/
 	melange build \
-		$(package)/$(package).yaml \
+		$(package).yaml \
 		-r packages/ \
 		-k wolfi-melange.rsa.pub \
 		-r https://packages.wolfi.dev/os \
@@ -87,7 +87,7 @@ build:
 test/%:
 	@mkdir -p ./$(*)/
 	$(eval pkgname := $*)
-	$(eval yamlfile := $(pkgname)/$(pkgname).yaml)
+	$(eval yamlfile := $(pkgname).yaml)
 	@if [ ! -f "$(yamlfile)" ]; then \
 		echo "Error: could not find yaml file at $(yamlfile)"; exit 1; \
 	else \

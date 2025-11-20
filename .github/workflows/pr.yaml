@@ -3,10 +3,7 @@ name: Pull Request Check
 on:
   pull_request:
     paths:
-      - "**/*.yaml"
-      - "!.github/**/*.yaml"
-      - "!images/**/*.yaml"
-      - "!examples/**/*.yaml"
+      - "*.yaml"
 
 jobs:
   lint:
@@ -36,10 +33,7 @@ jobs:
         with:
           files_yaml: |
             melange:
-              - '**/*.yaml'
-              - '!.github/**/*.yaml'
-              - '!images/**/*.yaml'
-              - '!examples/**/*.yaml'
+              - ./*.yaml
 
       - name: Build all packages
         run: |
@@ -48,7 +42,6 @@ jobs:
             if [[ $file == ".yam.yaml" ]]; then
               continue
             fi
-            packageName=$(basename $(dirname "$file"))
-            make package/"${packageName}"
-            make test/"${packageName}"
+            make package/"${file%.yaml}"
+            make test/"${file%.yaml}"
           done
