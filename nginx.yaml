@@ -19,8 +19,8 @@ environment:
       - busybox
       - openssl-dev
       - pcre2-dev
-      - zlib-dev
       - wget
+      - zlib-dev
 
 pipeline:
   - uses: fetch
@@ -75,7 +75,7 @@ update:
   enabled: true
   manual: false
   release-monitor:
-    identifier: 11583  # Nginx trên release-monitoring.org
+    identifier: 11583 # Nginx trên release-monitoring.org
 
 test:
   pipeline:

@@ -49,4 +49,3 @@ subpackages:
 update:
   enabled: false
   # reason: "Fixed to version 4.2.0 for compatibility with existing applications"
-
