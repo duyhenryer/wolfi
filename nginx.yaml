@@ -17,10 +17,11 @@ environment:
     packages:
       - build-base
       - busybox
+      - ca-certificates-bundle
       - openssl-dev
       - pcre2-dev
-      - zlib-dev
       - wget
+      - zlib-dev
 
 pipeline:
   - uses: fetch
@@ -28,11 +29,11 @@ pipeline:
       uri: https://nginx.org/download/nginx-${{package.version}}.tar.gz
       expected-sha256: d2e6c8439d6c6db5015d8eaab2470ab52aef85a7bf363182879977e084370497 #31327d30a6ff81e5e4a1a442ad183859bc0d751d1e06a2e84dc7a1af416229
 
-  - uses: autoconf/configure
-    with:
-      opts: |
+  - name: Configure
+    runs: |
+      ./configure \
         --prefix=/usr \
-        --sbin-path=/usr/sbin/nginx \
+        --sbin-path=/usr/bin/nginx \
         --conf-path=/etc/nginx/nginx.conf \
         --pid-path=/var/run/nginx.pid \
         --lock-path=/var/run/nginx.lock \
@@ -63,11 +64,17 @@ pipeline:
         --with-stream \
         --with-stream_ssl_module \
         --with-stream_realip_module \
-        --with-stream_ssl_preread_module
+        --with-stream_ssl_preread_module \
+        --with-cc-opt="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wno-error" \
+        --with-ld-opt="-Wl,-z,relro -Wl,-z,now"
 
-  - uses: autoconf/make
+  - name: Build
+    runs: |
+      make -j$(nproc)
 
-  - uses: autoconf/make-install
+  - name: Install
+    runs: |
+      make install DESTDIR="${{targets.destdir}}"
 
   - uses: strip
 
@@ -75,7 +82,7 @@ update:
   enabled: true
   manual: false
   release-monitor:
-    identifier: 11583  # Nginx trên release-monitoring.org
+    identifier: 11583 # Nginx trên release-monitoring.org
 
 test:
   pipeline:

@@ -4,10 +4,7 @@ on:
   pull_request:
     paths:
       - "*.yaml"
-permissions:
-  contents: read
-  pull-requests: read
-  
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -21,12 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/wolfi-dev/sdk:latest
-      options: --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined
+      options: |
+        --cap-add NET_ADMIN --cap-add SYS_ADMIN --device /dev/fuse --security-opt seccomp=unconfined --security-opt apparmor=unconfined
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+
+      - name: Generate key
+        run: melange keygen
 
       - name: Look for changed files
         id: changes
@@ -37,15 +36,12 @@ jobs:
               - ./*.yaml
 
       - name: Build all packages
-        if: steps.changes.outputs.melange_all_changed_files != ''
         run: |
+          make init
           for file in ${{ steps.changes.outputs.melange_all_changed_files }}; do
-            melange build \
-              --arch x86_64 \
-              -r https://packages.wolfi.dev/os \
-              -k https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
-              -r https://wolfi.duyne.me \
-              -k https://wolfi.duyne.me/wolfi-melange.rsa.pub \
-              --log-level debug \
-              $file || { echo "Build failed for $file"; exit 1; }
+            if [[ $file == ".yam.yaml" ]]; then
+              continue
+            fi
+            make package/"${file%.yaml}"
+            make test/"${file%.yaml}"
           done
