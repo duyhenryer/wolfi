@@ -37,4 +37,4 @@ ENV PHP_FPM_USER=www-data \
 
 COPY --link rootfs /
 
-CMD [ "/usr/sbin/php-fpm" ]
+CMD [ "/usr/bin/php-fpm" ]

@@ -29,21 +29,18 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to GHCR
-        uses: docker/login-action@v3
+
+      - name: Login into Github Docker Registery
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - uses: docker/build-push-action@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push base image
-        uses: docker/build-push-action@v6
-        with:
-          context: images/base
-          file: images/base/Dockerfile
-          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/duyhenryer/wolfi/base:latest
+          platforms: linux/amd64,linux/arm64
+          context: images/base
           push: true
           provenance: false
 
@@ -59,78 +56,64 @@ jobs:
           - 8.4
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@v5
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to GHCR
-        uses: docker/login-action@v3
+
+      - name: Login into Github Docker Registery
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - uses: docker/build-push-action@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push php-fpm image
-        uses: docker/build-push-action@v6
-        with:
-          context: images/php/fpm
-          file: images/php/fpm/Dockerfile
-          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/duyhenryer/wolfi/php-fpm:${{ matrix.php }}
+          platforms: linux/amd64,linux/arm64
+          context: images/php/fpm
           build-args: PHP_VERSION=${{ matrix.php }}
           push: true
           provenance: false
 
       - name: Sign image
         run: cosign sign --yes ghcr.io/duyhenryer/wolfi/php-fpm:${{ matrix.php }}
+
   nginx:
     runs-on: ubuntu-latest
-    needs: base
-    # if: ${{ github.event_name != 'schedule' || needs.check-upstream.outputs.should_build == 'true' }}
+    needs: php-fpm
+    strategy:
+      matrix:
+        php:
+          - 8.4
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@v5
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
 
-      - name: Install yq
-        run: |
-          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-          chmod +x /usr/bin/yq
-      - name: Extract nginx version
-        id: version
-        run: |
-          VERSION=$(yq eval '.package.version' nginx.yaml)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Nginx version: $VERSION"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+      
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to GHCR
-        uses: docker/login-action@v3
+
+      - name: Login into Github Docker Registery
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - uses: docker/build-push-action@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push nginx image
-        uses: docker/build-push-action@v6
-        with:
-          context: images/nginx
-          file: images/nginx/Dockerfile
+          tags: ghcr.io/duyhenryer/wolfi/nginx:${{ matrix.php }}
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/duyhenryer/wolfi/nginx:${{ steps.version.outputs.version }}
-            ghcr.io/duyhenryer/wolfi/nginx:latest
+          context: images/nginx
+          build-args: PHP_VERSION=${{ matrix.php }}
           push: true
           provenance: false
 
-      - name: Sign images
-        run: |
-          cosign sign --yes ghcr.io/duyhenryer/wolfi/nginx:${{ steps.version.outputs.version }}
-          cosign sign --yes ghcr.io/duyhenryer/wolfi/nginx:latest
+      - name: Sign image
+        run: cosign sign --yes ghcr.io/duyhenryer/wolfi/nginx:${{ matrix.php }}
+
