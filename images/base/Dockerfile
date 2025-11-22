@@ -2,7 +2,7 @@ FROM cgr.dev/chainguard/wolfi-base:latest
 
 RUN echo "https://wolfi.duyne.me" > /etc/apk/repositories && \
     echo "https://packages.wolfi.dev/os" >> /etc/apk/repositories && \
-    cat <<EOF > /etc/apk/keys/wolfi-melange.rsa.pub
+    cat <<EOF > /etc/apk/keys/melange.rsa.pub
 -----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5AqGblXA57jN4PbrDgVl
 OpTCOlRdT+LVzVBlYiYCRYk6pFCQ2yNXx1f9nmT02mv9G82tMSC3pjc/pij/mdCB
