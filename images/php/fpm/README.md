@@ -2,17 +2,17 @@
 
 ## Image information
 
-- Build for PHP 8.2 and 8.3
+- Build for PHP 8.4
 - Build for amd64/arm64
 - Pretty small with just PHP-FPM installed
 
 ## Usage
 
 ```dockerfile
-FROM ghcr.io/shyim/wolfi-php/fpm:8.3
+FROM ghcr.io/duyhenryer/wolfi/php-fpm:8.4
 
 # Install missing extensions
-RUN apk add --no-cache php-8.3-redis php-8.3-gd
+RUN apk add --no-cache php-8.4-redis php-8.4-gd
 
 # Copy your files
 COPY . /var/www/html
@@ -68,7 +68,7 @@ docker run \
 or in your Dockerfile:
 
 ```dockerfile
-FROM ghcr.io/shyim/wolfi-php/fpm:8.3
+FROM ghcr.io/duyhenryer/wolfi/php-fpm:8.4
 
 ENV PHP_MEMORY_LIMIT=256M
 ```
@@ -78,9 +78,9 @@ ENV PHP_MEMORY_LIMIT=256M
 To use Redis as session handler, you need to install the Redis extension and set the session handler to redis:
 
 ```dockerfile
-FROM ghcr.io/shyim/wolfi-php/fpm:8.3
+FROM ghcr.io/duyhenryer/wolfi/php-fpm:8.4
 
-RUN apk add --no-cache php-8.3-redis
+RUN apk add --no-cache php-8.4-redis
 
 # Set session handler to redis
 ENV PHP_SESSION_HANDLER=redis \
@@ -92,7 +92,7 @@ ENV PHP_SESSION_HANDLER=redis \
 To add custom PHP, create a file `/etc/php/conf.d/zz-custom.ini` and add your configuration there:
 
 ```dockerfile
-FROM ghcr.io/shyim/wolfi-php/fpm:8.3
+FROM ghcr.io/duyhenryer/wolfi/php-fpm:8.4
 
 COPY custom.ini /etc/php/conf.d/zz-custom.ini
 ```
@@ -100,7 +100,7 @@ COPY custom.ini /etc/php/conf.d/zz-custom.ini
 for FPM you can do the same with the path `/etc/php/php-fpm.d/zz-custom.conf`:
 
 ```dockerfile
-FROM ghcr.io/shyim/wolfi-php/fpm:8.3
+FROM ghcr.io/duyhenryer/wolfi/php-fpm:8.4
 
 COPY custom.conf /etc/php/php-fpm.d/zz-custom.conf
 ```

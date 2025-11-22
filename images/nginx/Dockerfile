@@ -8,4 +8,4 @@ RUN apk add --no-cache nginx nginx-config && \
 WORKDIR /var/www/html
 EXPOSE 80
 
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+CMD ["/usr/bin/nginx", "-g", "daemon off;"]
