@@ -49,7 +49,6 @@ jobs:
 
   php-fpm:
     runs-on: ubuntu-latest
-    needs: base
     strategy:
       matrix:
         php:
@@ -84,7 +83,6 @@ jobs:
 
   nginx:
     runs-on: ubuntu-latest
-    needs: base
     strategy:
       matrix:
         php:
