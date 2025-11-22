@@ -33,7 +33,7 @@ pipeline:
     runs: |
       ./configure \
         --prefix=/usr \
-        --sbin-path=/usr/sbin/nginx \
+        --sbin-path=/usr/bin/nginx \
         --conf-path=/etc/nginx/nginx.conf \
         --pid-path=/var/run/nginx.pid \
         --lock-path=/var/run/nginx.lock \
