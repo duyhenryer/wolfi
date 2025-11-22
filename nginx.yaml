@@ -65,7 +65,7 @@ pipeline:
         --with-stream_ssl_module \
         --with-stream_realip_module \
         --with-stream_ssl_preread_module \
-        --with-cc-opt="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2" \
+        --with-cc-opt="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wno-error" \
         --with-ld-opt="-Wl,-z,relro -Wl,-z,now"
 
   - name: Build
