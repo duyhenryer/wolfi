@@ -13,18 +13,18 @@ MELANGE_OPTS += --arch ${ARCH}
 MELANGE_OPTS += --repository-append https://packages.wolfi.dev/os
 MELANGE_OPTS += --keyring-append https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
 MELANGE_OPTS += --repository-append https://wolfi.duyne.me
-MELANGE_OPTS += --keyring-append https://wolfi.duyne.me/melange.rsa.pub
+MELANGE_OPTS += --keyring-append https://wolfi.duyne.me/wolfi-melange.rsa.pub
 MELANGE_OPTS += --git-repo-url=https://github.com/duyhenryer/wolfi
 MELANGE_OPTS += --git-commit=$(shell git rev-parse HEAD)
 MELANGE_OPTS += ${MELANGE_EXTRA_OPTS}
 
 MELANGE_TEST_OPTS += --repository-append packages/
 MELANGE_TEST_OPTS += --keyring-append melange.rsa.pub
-MELANGE_OPTS += --arch ${ARCH}
+MELANGE_TEST_OPTS += --arch ${ARCH}
 MELANGE_TEST_OPTS += --repository-append https://packages.wolfi.dev/os
 MELANGE_TEST_OPTS += --keyring-append https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
 MELANGE_TEST_OPTS += --repository-append https://wolfi.duyne.me
-MELANGE_TEST_OPTS += --keyring-append https://wolfi.duyne.me/melange.rsa.pub
+MELANGE_TEST_OPTS += --keyring-append https://wolfi.duyne.me/wolfi-melange.rsa.pub
 MELANGE_TEST_OPTS += --test-package-append wolfi-base
 MELANGE_TEST_OPTS += --debug
 MELANGE_TEST_OPTS += ${MELANGE_EXTRA_OPTS}
