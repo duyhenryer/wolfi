@@ -17,6 +17,7 @@ environment:
     packages:
       - build-base
       - busybox
+      - ca-certificates-bundle
       - openssl-dev
       - pcre2-dev
       - wget
@@ -63,12 +64,16 @@ pipeline:
         --with-stream \
         --with-stream_ssl_module \
         --with-stream_realip_module \
-        --with-stream_ssl_preread_module
+        --with-stream_ssl_preread_module \
+        --with-cc-opt="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2" \
+        --with-ld-opt="-Wl,-z,relro -Wl,-z,now"
 
-  - runs: |
+  - name: Build
+    runs: |
       make -j$(nproc)
 
-  - runs: |
+  - name: Install
+    runs: |
       make install DESTDIR="${{targets.destdir}}"
 
   - uses: strip
