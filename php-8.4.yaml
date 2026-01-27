@@ -349,7 +349,7 @@ test:
     - runs: |
         cat <<'EOF' >> /tmp/hello.php
         <?php
-        echo 'Hello, Wolfi!!';
+        echo 'Hello, Wolfi!!!';
         EOF
 
         php /tmp/hello.php
