@@ -72,7 +72,7 @@ pipeline:
     runs: |
       make -j$(nproc)
 
-  - name: Install
+  - name: Installon
     runs: |
       make install DESTDIR="${{targets.destdir}}"
 
@@ -82,7 +82,7 @@ update:
   enabled: true
   manual: false
   release-monitor:
-    identifier: 11583 # Nginx trên release-monitoring.org
+    identifier: 11583 # Nginx on release-monitoring.org
 
 test:
   pipeline:
